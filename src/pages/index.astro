@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { withBase } from '../lib/urls';
+
+const projects = (await getCollection('projects', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const featured = projects.filter(({ data }) => data.featured).slice(0, 3);
+---
+
+<BaseLayout>
+  <section class="hero">
+    <p class="eyebrow">Независимая разработка · заметки по ходу дела</p>
+    <h1>Проекты,<br /><span>которые дошли</span><br />до релиза.</h1>
+    <div class="hero-bottom">
+      <p>Здесь я разбираю свои pet-проекты без глянца: идея, решения, тупики, код и результат.</p>
+      <a class="button" href={withBase('projects')}>Смотреть проекты</a>
+    </div>
+  </section>
+
+  <section class="projects">
+    <div class="section-heading">
+      <p class="eyebrow">Выборка</p>
+      <h2>Свежие работы</h2>
+    </div>
+    <div>
+      {(featured.length ? featured : projects.slice(0, 3)).map((project, index) => <ProjectCard {project} {index} />)}
+    </div>
+  </section>
+
+  <section class="note">
+    <p class="eyebrow">Подход</p>
+    <p class="manifesto">Маленький работающий релиз полезнее большого плана. Поэтому каждая запись отвечает на три вопроса: что проверял, как собрал и что понял.</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero { padding: clamp(4rem, 10vw, 8rem) 0 5rem; }
+  h1 span { color: var(--accent); }
+  .hero-bottom { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin: 2.5rem 0 0 30%; }
+  .hero-bottom p { margin: 0; font-size: 1.2rem; }
+  .projects { padding: 5rem 0; }
+  .section-heading { display: flex; align-items: end; justify-content: space-between; }
+  .section-heading h2 { margin: 0 0 2rem; }
+  .note { display: grid; grid-template-columns: 1fr 3fr; gap: 2rem; padding: 5rem 0; border-top: 1px solid var(--line); }
+  .manifesto { margin: 0; max-width: none; font-size: clamp(1.75rem, 4vw, 3.2rem); line-height: 1.18; letter-spacing: -.035em; }
+  @media (max-width: 680px) { .hero-bottom { align-items: flex-start; flex-direction: column; margin-left: 0; } .note { grid-template-columns: 1fr; } }
+</style>

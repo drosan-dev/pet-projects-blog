@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="О блоге" description="Зачем существует этот блог о pet-проектах.">
+  <article class="prose intro">
+    <p class="eyebrow">О блоге</p>
+    <h1>Рабочий журнал,<br />а не витрина.</h1>
+    <p class="lead">Этот блог помогает не терять решения, ошибки и выводы между проектами — и делиться ими с теми, кто тоже строит свои продукты.</p>
+    <h2>Что здесь будет</h2>
+    <p>Разборы архитектуры, выбор инструментов, короткие дневники разработки и честные итоги после запуска. Каждая статья привязана к конкретному проекту и обновляется вместе с ним.</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .intro { margin-top: 5rem; }
+  .intro h1 { font-size: clamp(3rem, 7vw, 6rem); }
+  .lead { font-size: 1.35rem; color: var(--muted); }
+</style>

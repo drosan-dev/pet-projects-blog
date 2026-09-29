@@ -1,0 +1,58 @@
+name: Cross-post new project
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/content/projects/**.md'
+      - 'src/content/projects/**.mdx'
+  workflow_dispatch:
+    inputs:
+      file:
+        description: 'Path to a project Markdown file'
+        required: true
+        default: 'src/content/projects/local-focus.md'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Find posts to publish
+        id: posts
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            files="${{ inputs.file }}"
+          else
+            files=$(git diff --diff-filter=AM --name-only HEAD^ HEAD -- 'src/content/projects/*.md' 'src/content/projects/*.mdx')
+          fi
+          {
+            echo 'files<<EOF'
+            echo "$files"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+      - name: Publish announcements
+        if: steps.posts.outputs.files != ''
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          BASE_PATH: ${{ vars.BASE_PATH }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          VK_ACCESS_TOKEN: ${{ secrets.VK_ACCESS_TOKEN }}
+          VK_GROUP_ID: ${{ secrets.VK_GROUP_ID }}
+        shell: bash
+        run: |
+          while IFS= read -r file; do
+            [[ -n "$file" ]] && node scripts/crosspost.mjs "$file"
+          done <<< "${{ steps.posts.outputs.files }}"

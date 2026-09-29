@@ -1,0 +1,24 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+
+const projects = (await getCollection('projects', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+---
+
+<BaseLayout title="Проекты" description="Каталог pet-проектов с техническими заметками и выводами.">
+  <header class="page-head">
+    <p class="eyebrow">Архив экспериментов</p>
+    <h1>Все проекты</h1>
+    <p>{projects.length} {projects.length === 1 ? 'проект' : 'проекта'}: от ранней идеи до опубликованного продукта.</p>
+  </header>
+  <section aria-label="Список проектов">
+    {projects.map((project, index) => <ProjectCard {project} {index} />)}
+  </section>
+</BaseLayout>
+
+<style>
+  .page-head { padding: 5rem 0 3rem; }
+  .page-head p:last-child { color: var(--muted); font-size: 1.15rem; }
+</style>
