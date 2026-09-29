@@ -12,9 +12,12 @@ if (data.draft || data.announce === false) {
 }
 
 const slug = file.split(/[\\/]/).pop().replace(/\.mdx?$/, '');
-const baseUrl = (process.env.SITE_URL ?? '').replace(/\/$/, '');
-const basePath = (process.env.BASE_PATH ?? '').replace(/^\/?/, '/').replace(/\/$/, '');
-if (!baseUrl) throw new Error('SITE_URL is required');
+const [githubOwner = '', githubRepo = ''] = (process.env.GITHUB_REPOSITORY ?? '').split('/');
+const baseUrl = (process.env.SITE_URL || (githubOwner ? `https://${githubOwner}.github.io` : '')).replace(/\/$/, '');
+const inferredPath = githubRepo && githubRepo !== `${githubOwner}.github.io` ? `/${githubRepo}` : '';
+const rawBasePath = process.env.BASE_PATH || inferredPath;
+const basePath = rawBasePath ? `/${rawBasePath.replace(/^\/+|\/+$/g, '')}` : '';
+if (!baseUrl) throw new Error('SITE_URL or GITHUB_REPOSITORY is required');
 const url = `${baseUrl}${basePath}/projects/${slug}/`;
 const text = `${data.title}\n\n${data.description}\n\n${url}`;
 
